@@ -1,5 +1,6 @@
 const userModel = require("../models/user.model")
 const bcrypt = require("bcryptjs")
+const jwt = require("jsonwebtoken")
 
 async function registerUserController(req, res){
     const {username, email, password} = req.body
@@ -14,7 +15,7 @@ async function registerUserController(req, res){
         $or: [ {username}, {email} ]
     })
 
-    if(!isUserAlreadyExist){
+    if(isUserAlreadyExist){
         return res.status(400).json({
             message: "Account Already existed with username or email"
         })
@@ -42,4 +43,43 @@ async function registerUserController(req, res){
     })
 }
 
-module.exports = {registerUserController}
+async function logInUserController(req, res){
+    const { email, password} = req.body
+
+    if(!email || !password){
+        return res.status(400).json({
+            message: "Please provide  email and password"
+        })
+    }
+
+    const user = await userModel.findOne({email})
+
+    if(!user){
+        return res.status(400).json({
+            message: "invalid  email or password"
+        })
+    }
+
+    const isPasswordVaild = await bcrypt.compare(password, user.password)
+
+    if(!isPasswordVaild){
+        return res.status(400).json({
+            message: "invaild  email or password"
+        })
+    }
+
+    const token = jwt.sign({id: user._id, username: user.username}, process.env.JWT_SECRET, {expiresIn: "1d"})
+
+    res.cookie("token", token)
+
+    return res.status(200).json({
+        message: "User Login successfully",
+        user:{
+            id: user._id,
+            username: user.username,
+            email: user.email
+        }
+    })
+}
+
+module.exports = {registerUserController, logInUserController}
