@@ -9,9 +9,14 @@ const authRouter = express.Router()
 authRouter.post("/register", authController.registerUserController)
 
 /**
- * @route GET /api/auth/login
+ * @route POST /api/auth/login
  */
 
 authRouter.post("/login", authController.logInUserController)
 
+/**
+ * @route POST /api/auth/logout
+ */
+
+authRouter.get("/logout", authController.logoutUserController)
 module.exports = authRouter
