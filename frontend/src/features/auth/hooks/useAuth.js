@@ -1,6 +1,8 @@
-import {useContext} from "react"
+import {useContext, useEffect} from "react"
 import {AuthContext} from "../auth.context"
 import {login, register, logout, getMe} from "../services/auth.api"
+
+
 
 export const useAuth = () => {
     const context = useContext(AuthContext);
@@ -45,7 +47,35 @@ export const useAuth = () => {
         }
     }
 
-    
+    useEffect(()=>{
+        let isMounted = true
+
+        const getAndSetUser = async()=>{
+            try {
+                const data = await getMe()
+                if (isMounted) {
+                    setUser(data.user)
+                }
+            } catch (error) {
+                if (isMounted) {
+                    setUser(null)
+                    if (error.response?.status !== 401) {
+                        console.error("Failed to restore authenticated user:", error)
+                    }
+                }
+            } finally {
+                if (isMounted) {
+                    setLoading(false)
+                }
+            }
+        }
+
+        getAndSetUser()
+
+        return () => {
+            isMounted = false
+        }
+    }, [])
 
     return { user, handleLogin, handleRegister, handleLogout, loading };
 };
