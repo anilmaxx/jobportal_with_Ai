@@ -1,9 +1,20 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {useNavigate, Link} from "react-router"
+import { useAuth } from '../hooks/useAuth'
 
 const Register = () => {
-    const handleSubmit = (e) => {
+    const [username, setUsername] = useState("")
+    const navigate = useNavigate()
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
+    const {loading, handleRegister} = useAuth()
+    const handleSubmit = async (e) => {
         e.preventDefault()
+        await handleRegister({username, email, password})
+        navigate("/")
+    }
+    if(loading){
+        return(<main><h1>Loading.....</h1></main>)
     }
   return (
     <main>
@@ -12,15 +23,15 @@ const Register = () => {
             <form onSubmit={handleSubmit}>
                 <div className="input-group">
                     <label htmlFor="username">Username</label>
-                    <input type="username" id="username" name="username" placeholder='Enter usename'/>
+                    <input onChange={(e)=>{setUsername(e.target.value)}} type="username" id="username" name="username" placeholder='Enter usename'/>
                 </div>
                 <div className="input-group">
                     <label htmlFor="email">Email</label>
-                    <input type="email" id="email" name="email" placeholder='Enter email address'/>
+                    <input onChange={(e)=>{setEmail(e.target.value)}} type="email" id="email" name="email" placeholder='Enter email address'/>
                 </div>
                 <div className="input-group">
                     <label htmlFor="password">Password</label>
-                    <input type="password" id="password" name="password" placeholder='Enter password'/>
+                    <input onChange={(e)=>{setPassword(e.target.value)}} type="password" id="password" name="password" placeholder='Enter password'/>
                 </div>
                 <button className='button primary-button'>Register</button>
             </form>
